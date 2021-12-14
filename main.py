@@ -260,12 +260,7 @@ def dfs_solved():
                     return False
 
                 # check for diagonal
-                if ((i + 1 < length and field[j][i + 1]) or (i - 1 >= 0 and field[j][i - 1]) or (
-                        j + 1 < length and field[j + 1][i]) or (j - 1 >= 0 and field[j - 1][i])) or \
-                        (i + 1 < length and j - 1 >= 0 and field[j - 1][i + 1]) or (
-                        i + 1 < length and j + 1 < length and field[j + 1][i + 1]) or (
-                        i - 1 >= 0 and j - 1 >= 0 and field[j - 1][i - 1]) or (
-                        i - 1 >= 0 and j + 1 < length and field[j + 1][i - 1]):
+                if (i - 1 >= 0 and j - 1 >= 0 and field[i-1][j-1]) or (i - 1 >= 0 and j + 1 < length and field[i-1][j+1]) or (i + 1 < length and j - 1 >= 0 and field[i+1][j-1]) or (i + 1 < length and j + 1 < length and field[i+1][j+1]):
                     return False
 
                 #check for vertical and horizontal ships from one place
@@ -283,8 +278,11 @@ def dfs_solved():
 
 def dfs(x, y, nodes):
     global field
+    global steps
+    global states
+
     length = len(field_bottom)
-    max_nodes = 10 if length == 6 else 20
+    max_nodes = 10 if length == 6 else 20 if length == 10 else 4
 
     #already visted
     if field[x][y]:
@@ -293,20 +291,19 @@ def dfs(x, y, nodes):
     #new visited node
     field[x][y] = True
     draw_rectangle(x,y,"black")
-    #window.update()
-    #time.sleep(timedelay)
+    steps += 1
+    window.update()
+    time.sleep(timedelay)
 
 
     if nodes >= max_nodes:
         is_solved = dfs_solved()
         if (not is_solved):
             draw_rectangle(x,y,"white")
-            #window.update()
-            #time.sleep(timedelay)
             field[x][y] = False
+            states += 1
             return False
         else:
-            #draw_rectangle(x, y, "black")
             return True
 
     tmpy  = y
@@ -314,7 +311,6 @@ def dfs(x, y, nodes):
     for i in range(x,length):
         for j in range(tmpy,length):
             if dfs(i, j, nodes + 1):
-                #draw_rectangle(x,y, "black")
                 return True
         tmpy = 0
 
@@ -323,22 +319,29 @@ def dfs(x, y, nodes):
     #this node is not the right one
     field[x][y] = False
     draw_rectangle(x, y, "white")
-    #window.update()
-    #time.sleep(timedelay)
     return False
 
 def dfs_start(output):
+    global  states
     reset(output_text)
 
     tmp = len(field_bottom)
 
+    starttime = time.time_ns()
+    endtime = 0.0
+    alltime = 0.0
     for m in range (tmp):
         for n in range (tmp):
             if dfs(m,n, 1):
-                output.set("DFS Successed")
+                states += 1
+                endtime = time.time_ns()
+                alltime = round((endtime - starttime) * 0.000000001,3)
+                output.set("DFS Successed. Steps: " + str(steps) + " ,States: " + str(states)+", Time: " + str(alltime) + " s.")
                 return
-            else:
-                output.set("DFS Failed")
+
+    endtime = time.time_ns()
+    alltime = round((endtime - starttime) * 0.000000001, 3)
+    output.set("DFS Failed. Steps: " + str(steps) + " ,States: " + str(states)+", Time: " + str(alltime) + " s.")
 
 
 def bt_solve(ships, bot, right):
@@ -495,12 +498,13 @@ def start_bt_mrv(output):
     timestart = time.time_ns()
     succes = bt_solve(ships, field_bottom.copy(), field_right.copy())
     timeend = time.time_ns()
+    alltime = round((timeend - timestart) * 0.000000001,3)
 
     if succes:
         states += 1
-        output.set("BT_MRV Succesed. Steps: " + str(steps) + " ,States: " + str(states)+".")
+        output.set("BT_MRV Succesed. Steps: " + str(steps) + " ,States: " + str(states)+", Time: " + str(alltime) + " s.")
     else:
-        output.set("BT_MRV Failed. Steps: " + str(steps) + " ,States: " + str(states)+".")
+        output.set("BT_MRV Failed. Steps: " + str(steps) + " ,States: " + str(states)+", Time: " + str(alltime) + " s.")
 
 def start_bt_lcv(output):
     global states
@@ -512,16 +516,17 @@ def start_bt_lcv(output):
     timestart = time.time_ns()
     succes = bt_solve(ships, field_bottom.copy(), field_right.copy())
     timeend = time.time_ns()
+    alltime = round((timeend - timestart) * 0.000000001, 3)
 
     if succes:
         states += 1
-        output.set("BT_LCV Succesed. Steps: " + str(steps) + " ,States: " + str(states)+".")
+        output.set("BT_LCV Succesed. Steps: " + str(steps) + " ,States: " + str(states)+", Time: " + str(alltime) + " s.")
     else:
-        output.set("BT_LCV Failed. Steps: " + str(steps) + " ,States: " + str(states)+".")
+        output.set("BT_LCV Failed. Steps: " + str(steps) + " ,States: " + str(states)+", Time: " + str(alltime) + " s.")
 
 
 
-new_field(output_text, 6)
+new_field(output_text, 4)
 draw_rest()
 
 
