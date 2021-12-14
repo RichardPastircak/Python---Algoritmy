@@ -8,79 +8,32 @@ field_bottom = None
 field_right = None
 battleships = None
 field = [[False for i in range(10)]for j in range(10)]
-timedelay = 0
+timedelay = 0.1
 steps = 0
 states = 0
 
 
 window = Tk()
+#window.geometry("488x640")
 output_text = tkinter.StringVar()
 window.title("Battleships")
 canvas = None
 
-#new field - generovanie poli, draw hitns
-#rest - cyklus na draw hints
 
-'''
-def draw_hints(shape,x ,y):
-    if (shape == 0):
-        canvas.create_oval(25 * x + 25, 25 * y + 25, 25 * x + 50, 25 * y + 50, fill="black")
-    elif (shape == 1):
-        canvas.create_rectangle(25 * x + 25, 25 * y + 25, 25 * x + 50, 25 * y + 50, fill="black")
-    elif shape == 2:
-        canvas.create_arc(25 * x + 37.5, 25 * y + 25, 25 * x + 62.5, 25 * y + 50, start=90, extent=180, fill="black")
-    elif shape == 3:
-        canvas.create_arc(25 * x + 12.5, 25 * y + 25, 25 * x + 37.5, 25 * y + 50, start=270, extent=180, fill="black")
-    elif shape == 4:
-        canvas.create_arc(25 * x + 25, 25 * y + 37.5, 25 * x + 50, 25 * y + 62.5, extent=180, fill="black")
-    else:
-        canvas.create_arc(25 * x + 25, 25 * y + 12.5, 25 * x + 50, 25 * y + 37.5, start=180, extent=180, fill="black")
+def draw_field(fieldtype):
+    global canvas
+    tmp = 1 if fieldtype == 10 else 3 if fieldtype == 6 else 4
 
-def add_hints(field_bottom, field_right):
-    global used_hints
-    hints = random.randint(2,4)
-    hints_added = 0
-    used = [[0 for x in range(hints)] for y in range(3)]
+    canvas = Canvas(window, height=300, width=300)
 
-    while hints_added < hints:
-        repeat = False;
-        x = random.randint(1,8)
-        y = random.randint(1,8)
+    for i in range(1, fieldtype+1):
+        for j in range(1, fieldtype+1):
+            canvas.create_rectangle(25*tmp + (i-1) * 25, 25*tmp + (j-1)*25, 25*tmp + i * 25, 25*tmp + j * 25, fill="lightblue", outline="blue", width=2)
+            if i == fieldtype:
+                canvas.create_text(12.5 + 25 * (i + tmp), 12.5 + 25 * (j + tmp-1) , text=field_right[j - 1], font=("Arial", 13, "bold"))
+        canvas.create_text(12.5 + 25 * (i+tmp-1), 12.5 + 25 * (j + tmp), text=field_bottom[i - 1], font=("Arial", 13, "bold"))
 
-        #solve 0 cases
-        if field_bottom[x] == 0 or field_right[y] == 0:
-            continue
-
-        #prevents using same cooradinations
-        for i in range(0,hints_added):
-            if abs(used[0][i] - x) <= 1 and abs(used[1][i] - y) <= 1:
-                repeat = True
-                break
-        if repeat:
-            continue
-
-        #draw hints
-        shape = random.randint(0,5)
-        draw_hints(shape,x ,y)
-
-        used[0][hints_added] = x
-        used[1][hints_added] = y
-        used[2][hints_added] = shape
-        #print(str(used[0][hints_added])+str(used[1][hints_added])+" "+str(field_bottom[x])+str(field_right[y]))
-        hints_added += 1
-
-    used_hints = used
-'''
-
-def draw_field():
-    tmp = len(field_bottom)+1
-    for i in range(1, tmp):
-        for j in range(1, tmp):
-            canvas.create_rectangle(25+ (i-1) * 25, 25 + (j-1)*25, 25 + i * 25, 25 + j * 25, fill="white")
-            if i == tmp-1:
-                #canvas.create_rectangle(25 + i * 25, 25 + (j-1) * 25, 25 + (i+1) * 25, 25 + j * 25, fill="white", outline="white")
-                canvas.create_text(12.5 + 25 * (i + 1), 12.5 + 25 * j + 1, text=field_right[j - 1], font=("Arial", 13))
-        canvas.create_text(12.5 + 25 * i, 12.5 + 25 * (j + 1), text=field_bottom[i - 1], font=("Arial", 13))
+    canvas.grid(row=1, column=0, columnspan=5)
 
 def generate_field(fieldtype):
     sixfields = [[[3,0,4,0,1,2],[2,4,1,0,0,3]],[[2,2,1,1,3,1],[0,4,0,3,1,2]],[[0,3,1,2,1,3],[0,3,0,3,1,3]],[[3,0,1,4,0,2],[2,2,2,1,2,1]],[[2,0,0,4,1,3],[3,1,3,0,1,2]]]
@@ -133,7 +86,6 @@ def generate_field(fieldtype):
 def new_field(output, fieldtype):
     global field_bottom
     global field_right
-    global canvas
     global field
     global battleships
     global steps
@@ -141,8 +93,6 @@ def new_field(output, fieldtype):
 
     steps=0
     states=0
-
-    canvas = Canvas(window, height=300, width=300)
 
     if field_bottom is not None and fieldtype != len(field_bottom):
         field_bottom = None
@@ -161,14 +111,12 @@ def new_field(output, fieldtype):
     field_right = tmp[1]
 
     # draw the field
-    draw_field()
+    draw_field(fieldtype)
     output.set("")
     for i in range(len(field_bottom)):
         for j in range(len(field_bottom)):
             field[i][j] = False
 
-    #add_hints(field_bottom,field_right)
-    canvas.grid(row=1, column=0, columnspan=5)
 
 def reset(output):
     global field
@@ -178,67 +126,78 @@ def reset(output):
     steps= 0
     states = 0
 
-    tmp = len(field_bottom)+1
-    for i in range(1, tmp):
-        for j in range(1, tmp):
+    draw_field(len(field_bottom))
 
-            canvas.create_rectangle(25+ (i-1) * 25, 25 + (j-1)*25, 25 + i * 25, 25 + j * 25, fill="white")
-            if i == tmp-1:
-                canvas.create_text(12.5 + 25 * (i + 1), 12.5 + 25 * j + 1, text=field_right[j - 1], font=("Arial", 13))
-
-    tmp = tmp -1
+    tmp = len(field_bottom)
     for i in range (tmp):
         for j in range (tmp):
             field[i][j] = False
     output.set("")
-    #for i in range (len(used_hints[0])):
-    #    draw_hints(used_hints[2][i],used_hints[0][i],used_hints[1][i])
+
+def unsolvable():
+    global field_bottom
+    global field_right
+
+    field_bottom = [1,2,1]
+    field_right = [1,1,2]
+    reset(output_text)
+
+def setdelay(slider):
+    global timedelay
+    timedelay = float(slider)
 
 def draw_rest():
     # Heading
-    label = Label(window, text="Battleships", font=('Arial', 40, 'bold'), padx=100)
+    label = Label(window, text="Battleships", font=('Arial', 40, 'bold'), padx=100, fg="blue", bg="lightblue")
     label.grid(row=0, column=0, columnspan=5)
 
-    # Button times
-    threeButton = Button(window, text="3x3", padx=5, pady=5, command=lambda: new_field(output_text, 3))
-    threeButton.grid(row=2, column=1)
-
-    sixButton = Button(window, text="6x6", padx=5, pady=5, command= lambda: new_field(output_text,6))
-    sixButton.grid(row=2, column=2)
-
-    tenButton = Button(window, text="10x10", padx=5, pady=5, command= lambda: new_field(output_text,10))
-    tenButton.grid(row=2, column=3)
-
-    #resetButton = Button(window, text="Reset", padx=5, pady=5, command= lambda: reset(output_text))
-    #resetButton.grid(row=2, column=3)
+    #Slider
+    slider = Scale(window, from_=0, to=1, resolution = 0.1 ,orient=HORIZONTAL,  troughcolor="lightblue", fg="black", font=("Arial",13,"bold"), command= lambda x: setdelay(x), width=20)
+    slider.grid(row=2, column = 1, columnspan=3)
 
     empty2 = Label()
     empty2.grid(row=3, column=0, columnspan=5)
 
-    dfsButton = Button(window, text="DFS", padx=5, pady=5, command = lambda: dfs_start(output_text))
-    dfsButton.grid(row=4, column=1)
+    # Button times
+    threeButton = Button(window, text="3x3", padx=5, pady=5, command=lambda: new_field(output_text, 3), bg="lightblue", font=("Arial",12,"bold"), relief ="ridge", bd=5, activebackground="blue", activeforeground="white")
+    threeButton.grid(row=4, column=1)
 
-    mrvButton = Button(window, text="MRV", padx=5, pady=5, command= lambda: start_bt_mrv(output_text))
-    mrvButton.grid(row=4, column=2)
+    sixButton = Button(window, text="6x6", padx=5, pady=5, command= lambda: new_field(output_text,6), bg="lightblue", font=("Arial",12,"bold"), relief ="ridge", bd=5, activebackground="blue", activeforeground="white")
+    sixButton.grid(row=4, column=2)
 
-    lcvButton = Button(window, text="LCV", padx=5, pady=5, command= lambda: start_bt_lcv(output_text))
-    lcvButton.grid(row=4, column=3)
+    tenButton = Button(window, text="10x10", padx=5, pady=5, command= lambda: new_field(output_text,10), bg="lightblue", font=("Arial",12,"bold"), relief ="ridge", bd=5, activebackground="blue", activeforeground="white")
+    tenButton.grid(row=4, column=3)
+
+    empty2 = Label()
+    empty2.grid(row=5, column=0, columnspan=5)
+
+    dfsButton = Button(window, text="DFS", padx=5, pady=5, command = lambda: dfs_start(output_text), bg="lightblue", font=("Arial",12,"bold"), relief ="ridge", bd=5, activebackground="blue", activeforeground="white")
+    dfsButton.grid(row=6, column=1)
+
+    mrvButton = Button(window, text="MRV", padx=5, pady=5, command= lambda: start_bt_mrv(output_text), bg="lightblue", font=("Arial",12,"bold"), relief ="ridge", bd=5, activebackground="blue", activeforeground="white")
+    mrvButton.grid(row=6, column=2)
+
+    lcvButton = Button(window, text="LCV", padx=5, pady=5, command= lambda: start_bt_lcv(output_text), bg="lightblue", font=("Arial",12,"bold"), relief ="ridge", bd=5, activebackground="blue", activeforeground="white")
+    lcvButton.grid(row=6, column=3)
 
     empty = Label()
-    empty.grid(row=5, column=0, columnspan=5)
+    empty.grid(row=7, column=0, columnspan=5)
 
-    unsolvableButton = Button(window, text="Unsolvable", padx=5, pady=5)
-    unsolvableButton.grid(row=6, column=2)
+    unsolvableButton = Button(window, text="Unsolvable", padx=5, pady=5, command =unsolvable ,bg="lightblue", font=("Arial",12,"bold"), relief ="ridge", bd=5, activebackground="blue", activeforeground="white")
+    unsolvableButton.grid(row=8, column=2)
 
     empty1 = Label()
-    empty1.grid(row=7, column=0, columnspan=5)
+    empty1.grid(row=9, column=0, columnspan=5)
 
     # Output Window
-    output = Label(textvariable= output_text, font=("Arial", 15), pady=5)
-    output.grid(row=8, column=0, columnspan=5)
+    output = Label(textvariable= output_text, font=("Arial", 15, "bold"), pady=5, wraplength=400, justify="center")
+    output.grid(row=10, column=0, columnspan=5)
 
 def draw_rectangle(x,y,color):
-    canvas.create_rectangle(25 + x * 25, 25 + y * 25, 25 + (x + 1) * 25, 25 + (y + 1) * 25, fill=color)
+    outlinecolor = "black" if color == "black" else "blue"
+
+    tmp = 1 if len(field_bottom) == 10 else 3 if len(field_bottom) == 6 else 4
+    canvas.create_rectangle(25*tmp + x * 25, 25*tmp + y * 25, 25*tmp + (x + 1) * 25, 25*tmp + (y + 1) * 25, fill=color, outline=outlinecolor, width=2)
     canvas.grid(row=1, column=0, columnspan=5)
 
 
@@ -299,7 +258,7 @@ def dfs(x, y, nodes):
     if nodes >= max_nodes:
         is_solved = dfs_solved()
         if (not is_solved):
-            draw_rectangle(x,y,"white")
+            draw_rectangle(x,y,"lightblue")
             field[x][y] = False
             states += 1
             return False
@@ -318,7 +277,7 @@ def dfs(x, y, nodes):
 
     #this node is not the right one
     field[x][y] = False
-    draw_rectangle(x, y, "white")
+    draw_rectangle(x, y, "lightblue")
     return False
 
 def dfs_start(output):
@@ -406,7 +365,7 @@ def bt_solve(ships, bot, right):
                     returned = False
                     for k in range(ship):
                         field[j - k][i] = False
-                        draw_rectangle(j - k, i, "white")
+                        draw_rectangle(j - k, i, "lightblue")
 
                     j = j - ship + 1
                     window.update()
@@ -470,7 +429,7 @@ def bt_solve(ships, bot, right):
                     returned = False
                     for k in range(ship):
                         field[i][j-k] = False
-                        draw_rectangle(i, j-k, "white")
+                        draw_rectangle(i, j-k, "lightblue")
 
                     j = j - ship + 1
                     window.update()
@@ -525,8 +484,7 @@ def start_bt_lcv(output):
         output.set("BT_LCV Failed. Steps: " + str(steps) + " ,States: " + str(states)+", Time: " + str(alltime) + " s.")
 
 
-
-new_field(output_text, 4)
+new_field(output_text, 3)
 draw_rest()
 
 
