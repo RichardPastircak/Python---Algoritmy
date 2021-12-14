@@ -85,9 +85,25 @@ def draw_field():
 def generate_field(fieldtype):
     sixfields = [[[3,0,4,0,1,2],[2,4,1,0,0,3]],[[2,2,1,1,3,1],[0,4,0,3,1,2]],[[0,3,1,2,1,3],[0,3,0,3,1,3]],[[3,0,1,4,0,2],[2,2,2,1,2,1]],[[2,0,0,4,1,3],[3,1,3,0,1,2]]]
     tenfields = [[[3,2,1,5,1,4,1,5,0,3],[6,0,1,2,3,3,2,3,3,2]],[[2,2,4,1,7,0,2,4,1,2],[3,0,7,1,2,3,2,2,3,2]],[[3,2,5,1,5,1,3,2,3,0],[3,2,4,1,6,1,4,1,2,1]],[[2,0,6,0,7,0,4,2,1,3],[2,2,3,3,2,4,2,5,1,1]],[[1,6,2,2,1,1,4,3,3,2],[3,4,3,2,1,2,1,5,2,2]]]
+    threefields = [[[2,0,2],[2,1,1]],[[2,1,1],[2,0,2]],[[1,1,2],[2,0,2]],[[2,0,2],[1,1,2]]]
     rfield = None
 
-    if fieldtype == 6:
+    if fieldtype == 3:
+        while (True):
+            tmp = random.randint(0, 3)
+            newfield1 = threefields[tmp][0]
+            newfield2 = threefields[tmp][1]
+            if field_bottom != None:
+                for i in range(len(field_bottom)):
+                    if field_bottom[i] != newfield1[i] and field_right[i] != newfield2[i]:
+                        rfield = threefields[tmp]
+                        return rfield
+
+            else:
+                rfield = threefields[tmp]
+                return rfield
+
+    elif fieldtype == 6:
         while(True):
             tmp = random.randint(0,4)
             newfield = sixfields[tmp][0]
@@ -132,7 +148,10 @@ def new_field(output, fieldtype):
         field_bottom = None
         field_right = None
 
-    if fieldtype == 6:
+    if fieldtype == 3:
+        battleships = [2,1,1]
+
+    elif fieldtype == 6:
         battleships = [3,2,2,1,1,1]
     else:
         battleships = [5,4,3,3,2,2,2,1,1,1,1]
@@ -181,14 +200,17 @@ def draw_rest():
     label.grid(row=0, column=0, columnspan=5)
 
     # Button times
+    threeButton = Button(window, text="3x3", padx=5, pady=5, command=lambda: new_field(output_text, 3))
+    threeButton.grid(row=2, column=1)
+
     sixButton = Button(window, text="6x6", padx=5, pady=5, command= lambda: new_field(output_text,6))
-    sixButton.grid(row=2, column=1)
+    sixButton.grid(row=2, column=2)
 
     tenButton = Button(window, text="10x10", padx=5, pady=5, command= lambda: new_field(output_text,10))
-    tenButton.grid(row=2, column=2)
+    tenButton.grid(row=2, column=3)
 
-    resetButton = Button(window, text="Reset", padx=5, pady=5, command= lambda: reset(output_text))
-    resetButton.grid(row=2, column=3)
+    #resetButton = Button(window, text="Reset", padx=5, pady=5, command= lambda: reset(output_text))
+    #resetButton.grid(row=2, column=3)
 
     empty2 = Label()
     empty2.grid(row=3, column=0, columnspan=5)
@@ -306,8 +328,7 @@ def dfs(x, y, nodes):
     return False
 
 def dfs_start(output):
-    if states != 0 or steps !=0:
-        reset(output_text)
+    reset(output_text)
 
     tmp = len(field_bottom)
 
@@ -340,7 +361,9 @@ def bt_solve(ships, bot, right):
         len_of_ship = 0
         bottom = bot.copy()
         right1 = right.copy()
-        for j in range(length):
+        j = -1
+        while j < length-1:
+            j += 1
             #invalid row
             if right[i] < ship:
                 break
@@ -382,6 +405,7 @@ def bt_solve(ships, bot, right):
                         field[j - k][i] = False
                         draw_rectangle(j - k, i, "white")
 
+                    j = j - ship + 1
                     window.update()
                     time.sleep(timedelay)
 
@@ -405,7 +429,9 @@ def bt_solve(ships, bot, right):
         len_of_ship = 0
         bottom = bot.copy()
         right1 = right.copy()
-        for j in range(length):
+        j = -1
+        while j < length - 1:
+            j += 1
             if bot[i] < ship:
                 break
 
@@ -443,6 +469,7 @@ def bt_solve(ships, bot, right):
                         field[i][j-k] = False
                         draw_rectangle(i, j-k, "white")
 
+                    j = j - ship + 1
                     window.update()
                     time.sleep(timedelay)
 
@@ -461,9 +488,7 @@ def bt_solve(ships, bot, right):
 def start_bt_mrv(output):
     global states
 
-    if states != 0 or steps !=0:
-        reset(output_text)
-
+    reset(output_text)
     ships = battleships.copy()
     ships.sort(reverse=True)
 
@@ -479,10 +504,8 @@ def start_bt_mrv(output):
 
 def start_bt_lcv(output):
     global states
-    if states != 0 or steps !=0:
-        reset(output_text)
 
-
+    reset(output_text)
     ships = battleships.copy()
     ships.sort()
 
