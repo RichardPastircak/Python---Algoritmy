@@ -1,3 +1,4 @@
+<h1>Riešenie hry Battleships pomocou algoritmov DFS a BFS s heuristikov MRV, LCV</h1>
 V rámci toho programu som sa snažil nechať počítač riešiť hru Battleships pomocou nasledujúcich algoritmov:
 - DFS
 - Backtracking aloritmus s využím heuristiky LCV (Least Constraining Value)
